@@ -1,0 +1,22 @@
+{
+    "editor.formatOnSave": true,
+    "eslint.format.enable": true,
+    "editor.formatOnPaste": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true
+    },
+    "eslint.validate": [
+        "typescript"
+    ],
+    "html.format.enable": true,
+    "html.format.indentHandlebars": true,
+    "html.format.maxPreserveNewLines": 0,
+    "[handlebars]": {
+        "editor.defaultFormatter": "vscode.html-language-features",
+        "editor.formatOnSave": false
+    }
+    // "files.associations": {
+    //   "*.hbs": "html"
+    // }
+}
