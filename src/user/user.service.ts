@@ -59,7 +59,6 @@ export class UserService {
     let userProfile = userFromDb as UserProfile;
     return userProfile;
   }
-  // asd
   async findAll(): Promise<User[]> {
     return await this.userModel.find().populate("userRole").lean().exec();
   }
