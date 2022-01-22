@@ -9,7 +9,7 @@ import { HttpExceptionAnotated } from "src/common/global-models/exception";
 import { ResponseSuccess } from "src/common/global-models/success.model";
 import { RolesGuard } from "src/common/guards/roles.guard";
 import { CreateUserRoleDto } from "src/user-role/user-role.model";
-import { AcivateTokenDto, ChangeUserPWDto, CreateUserDto, Region, RegisterCustomerDto, SetAddressDto, TokenDto, UpdateCustomerDto, User, UserProfile } from "./user.model";
+import { AcivateTokenDto, ChangeUserPWDto, CreateUserDto, TokenDto, User, UserProfile } from "./user.model";
 import { UserService } from "./user.service";
 
 @ApiTags("User")
@@ -19,15 +19,15 @@ import { UserService } from "./user.service";
 export class UserController {
   constructor(private readonly userService: UserService, private readonly authService: AuthService) {}
 
-  @ApiOperation({ summary: "Create new User" })
-  @ApiCreatedResponse({ description: "The User has been successfully created", type: User })
-  @ApiUnauthorizedResponse({ description: "Not Logged In!", type: HttpExceptionAnotated })
-  @ApiBody({ type: CreateUserDto })
-  @Roles("Admin")
-  @Post("/create")
-  async createUser(@Body() userDto: CreateUserDto): Promise<User> {
-    return await this.userService.createUser(userDto);
-  }
+  // @ApiOperation({ summary: "Create new User" })
+  // @ApiCreatedResponse({ description: "The User has been successfully created", type: User })
+  // @ApiUnauthorizedResponse({ description: "Not Logged In!", type: HttpExceptionAnotated })
+  // @ApiBody({ type: CreateUserDto })
+  // @Roles("Admin")
+  // @Post("/create")
+  // async createUser(@Body() userDto: CreateUserDto): Promise<User> {
+  //   return await this.userService.createUser(userDto);
+  // }
 
   @ApiOkResponse({ description: "The User has been successfully returned", type: User })
   @ApiUnauthorizedResponse({ description: "Unauthorized", type: HttpExceptionAnotated })

@@ -2,7 +2,7 @@ import { RefreshToken, RefreshTokenDocument, RefreshTokenDto } from "./refresh-t
 import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
-import { ChangePassowrdWithToken, ChangeUserPWDto, CreateUserDto, Region, RegisterCustomerDto, SetAddressDto, Token, UpdateCustomerDto, User, UserDocument, UserProfile } from "./user.model";
+import { ChangePassowrdWithToken, ChangeUserPWDto, CreateUserDto, RegisterCustomerDto, Token, User, UserDocument, UserProfile } from "./user.model";
 import * as bcrypt from "bcrypt";
 import { UserRoleService } from "src/user-role/user-role.service";
 
@@ -25,6 +25,7 @@ export class UserService {
     try {
       delete userDto["userRole"];
       delete userDto["confirmNewPassword"];
+      userDto.activated = false;
       let userRole = await this.userRoleService.findByName("Teacher");
       userDto.userRole = new Types.ObjectId(userRole._id);
       let salt = await bcrypt.genSalt();
@@ -44,6 +45,31 @@ export class UserService {
       );
     }
   }
+
+  // async studentRegister(userDto: RegisterCustomerDto): Promise<User> {
+  //   try {
+  //     delete userDto["userRole"];
+  //     delete userDto["confirmNewPassword"];
+  //     userDto.activated = false;
+  //     let userRole = await this.userRoleService.findByName("Student");
+  //     userDto.userRole = new Types.ObjectId(userRole._id);
+  //     let salt = await bcrypt.genSalt();
+  //     let password = await bcrypt.hash(userDto.password, salt);
+  //     userDto.password = password;
+  //     let createdUser = await this.userModel.create(userDto);
+  //     await this.authService.generateAndSendActivationToken(createdUser.username);
+  //     return createdUser;
+  //   } catch (ex) {
+  //     console.log(ex);
+  //     throw new HttpException(
+  //       {
+  //         status: HttpStatus.BAD_REQUEST,
+  //         error: "Error while createion try again!",
+  //       },
+  //       HttpStatus.BAD_REQUEST,
+  //     );
+  //   }
+  // }
 
   async createUser(userDto: CreateUserDto): Promise<User> {
     let salt = await bcrypt.genSalt();

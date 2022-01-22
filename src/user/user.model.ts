@@ -8,15 +8,12 @@ import { UserExists } from "src/common/decorators/userExist.decorator";
 import { EmailExists } from "src/common/decorators/emailExist.decorator";
 import { Match } from "src/common/decorators/match.decorator";
 import { UserRole } from "src/user-role/user-role.model";
+import { Exam } from "src/exam/exam.model";
+import { Activity } from "src/activity/activity.model";
+import { Presence } from "src/presence/presence.model";
+import { Class } from "src/classs/class.model";
 
 export type UserDocument = User & Document;
-
-export enum Region {
-  UNITED_STATES = 1,
-  CANADA = 2,
-  GREAT_BRITAIN = 3,
-  EUROPEAN_UNION = 4,
-}
 
 @Schema()
 export class User {
@@ -47,24 +44,39 @@ export class User {
   @Prop({ required: true })
   password: string;
 
+  @ApiProperty({ type: String })
+  @Prop({ required: true })
+  subject: string;
+
   @ApiProperty({ type: Boolean })
   @Prop({ default: false })
   activated: boolean;
+
+  @ApiProperty({ type: String })
+  @Prop({ required: true })
+  school: string;
+
+  exams: Exam[];
+
+  activities: Activity[];
+
+  presences: Presence[];
+
+  classes: Class[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
 
 UserSchema.pre("save", function (next) {
-  // // @ts-ignore
-  // this.userRole = this.userRole ? Types.ObjectId(this.userRole) : this.userRole;
+  // @ts-ignore
+  this.userRole = this.userRole ? Types.ObjectId(this.userRole) : this.userRole;
 
   next();
 });
 
-// UserSchema.virtual("payoutMethods", {
-//   ref: "PaymentMethod",
-//   localField: "_id",
-//   foreignField: "user",
+// UserSchema.pre("findOneAndUpdate", function (next) {
+
+//   next();
 // });
 
 export class RegisterCustomerDto {
@@ -103,25 +115,19 @@ export class RegisterCustomerDto {
   @EmailExists()
   email: string;
 
-  @IsEmpty()
   userRole: Types.ObjectId;
-}
-
-export class UpdateCustomerDto {
-  @ApiProperty({ type: String })
-  @IsOptional()
-  @IsString()
-  username: string;
 
   @ApiProperty({ type: String })
-  @IsOptional()
+  @IsNotEmpty()
   @IsString()
-  firstName: string;
+  school: string;
 
   @ApiProperty({ type: String })
-  @IsOptional()
+  @IsNotEmpty()
   @IsString()
-  lastName: string;
+  subject: string;
+
+  activated: boolean;
 }
 
 export class CreateUserDto {
@@ -236,24 +242,6 @@ export class ChangePassowrdWithToken {
   confirmNewPassword: string;
 }
 
-export class SetAddressDto {
-  mobile: string;
-
-  address1: string;
-
-  address2: string;
-
-  country: string;
-
-  city: string;
-
-  state: string;
-
-  zip: string;
-
-  isbilling: boolean;
-}
-
 export class UserProfile {
   _id: Types.ObjectId;
 
@@ -268,25 +256,11 @@ export class UserProfile {
   lastName: string;
 
   activated: boolean;
+
+  school: string;
+
+  subject: string;
 }
-
-// export class UserSellerProfile {
-//   _id: string;
-
-//   email: string;
-
-//   shippingAddress: Address;
-
-//   billingAddress: Address;
-
-//   firstName: string;
-
-//   lastName: string;
-
-//   activated: boolean;
-
-//   userRole: UserRole;
-// }
 
 export class AcivateTokenDto {
   userName: string;
@@ -297,3 +271,31 @@ export class TokenDto {
   @IsString()
   token: string;
 }
+
+UserSchema.virtual("exams", {
+  ref: Exam.name,
+  localField: "_id",
+  foreignField: "user",
+  // populate: ["globalRarity"], // virtual
+});
+
+UserSchema.virtual("activities", {
+  ref: Activity.name,
+  localField: "_id",
+  foreignField: "user",
+  // populate: ["globalRarity"], // virtual
+});
+
+UserSchema.virtual("presences", {
+  ref: Presence.name,
+  localField: "_id",
+  foreignField: "user",
+  // populate: ["globalRarity"], // virtual
+});
+
+UserSchema.virtual("classes", {
+  ref: Class.name,
+  localField: "_id",
+  foreignField: "user",
+  // populate: ["globalRarity"], // virtual
+});

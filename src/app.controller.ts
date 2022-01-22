@@ -28,8 +28,8 @@ export class AppController {
     return response;
   }
 
-  @ApiOperation({ summary: "Register new Customer" })
-  @ApiCreatedResponse({ description: "The Customer has been successfully registered", type: User })
+  @ApiOperation({ summary: "Register new Teacher" })
+  @ApiCreatedResponse({ description: "The Teacher has been successfully registered", type: User })
   @ApiForbiddenResponse({ description: "Incorrect register data", type: HttpExceptionAnotated })
   @ApiBody({ type: RegisterCustomerDto })
   @Public()
@@ -37,6 +37,16 @@ export class AppController {
   async teacherRegister(@Body() userDto: RegisterCustomerDto): Promise<User> {
     return await this.userService.teacherRegister(userDto);
   }
+
+  // @ApiOperation({ summary: "Register new Student" })
+  // @ApiCreatedResponse({ description: "The Student has been successfully registered", type: User })
+  // @ApiForbiddenResponse({ description: "Incorrect register data", type: HttpExceptionAnotated })
+  // @ApiBody({ type: RegisterCustomerDto })
+  // @Public()
+  // @Post("register-student")
+  // async studentRegister(@Body() userDto: RegisterCustomerDto): Promise<User> {
+  //   return await this.userService.studentRegister(userDto);
+  // }
 
   @ApiOperation({ summary: "Generate new JWT with Refresh Token" })
   @ApiCreatedResponse({ description: "New JWT has been successfully generated", type: Token })
