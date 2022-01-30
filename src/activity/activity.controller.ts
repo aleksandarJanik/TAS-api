@@ -19,7 +19,7 @@ export class ActivityController {
   @ApiUnauthorizedResponse({ description: "Not Logged In!", type: HttpExceptionAnotated })
   @ApiBody({ type: ActivityDto })
   @Roles("Teacher")
-  @Post("/create")
+  @Post()
   async create(@Body() activityDto: ActivityDto, @Req() req): Promise<Activity> {
     return await this.activityService.create(activityDto, req.user);
   }
@@ -28,9 +28,9 @@ export class ActivityController {
   @ApiOkResponse({ description: "The Activity list has been successfully returned", type: [Activity] })
   @ApiUnauthorizedResponse({ description: "Not Logged In!", type: HttpExceptionAnotated })
   @Roles("Teacher")
-  @Get(":classId")
-  async findAll(@Req() req, @Param("classId") classId: string): Promise<Activity[]> {
-    return await this.activityService.findAll(classId, req.user);
+  @Get(":studentId")
+  async findAll(@Req() req, @Param("studentId") studentId: string): Promise<Activity[]> {
+    return await this.activityService.findAll(studentId, req.user);
   }
 
   @ApiOperation({ summary: "Remove Activity by id" })

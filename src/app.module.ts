@@ -9,6 +9,8 @@ import { ExamModule } from "./exam/exam.module";
 import { PresenceModule } from "./presence/presence.module";
 import { ActivityModule } from "./activity/activity.module";
 import { ClassModule } from "./classs/class.module";
+import { StudentService } from "./student/student.service";
+import { StudentModule } from "./student/student.module";
 
 @Module({
   imports: [
@@ -37,8 +39,9 @@ import { ClassModule } from "./classs/class.module";
     PresenceModule,
     ActivityModule,
     ClassModule,
+    StudentModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, StudentService],
 })
 export class AppModule {}

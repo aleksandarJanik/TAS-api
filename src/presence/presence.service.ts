@@ -1,7 +1,8 @@
 import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { Model } from "mongoose";
+import { Model, Types } from "mongoose";
 import { ClassService } from "src/classs/class.service";
+import { StudentService } from "src/student/student.service";
 import { UserService } from "src/user/user.service";
 import { Presence, PresenceDocument, PresenceDto } from "./presence.model";
 
@@ -11,7 +12,8 @@ export class PresenceService {
     @InjectModel(Presence.name) private presenceModel: Model<PresenceDocument>,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
     @Inject(forwardRef(() => ClassService)) private readonly classService: ClassService,
-  ) {}
+  ) // @Inject(forwardRef(() => StudentService)) private readonly studentService: StudentService,
+  {}
 
   async create(presenceDto: PresenceDto, user): Promise<Presence> {
     let userFromDb = await this.userService.findById(user._id);
@@ -39,28 +41,13 @@ export class PresenceService {
     }
   }
 
-  async findAll(classId, user): Promise<Presence[]> {
+  async findAll(studentId, user): Promise<Presence[]> {
     let userFromDb = await this.userService.findById(user._id);
-    let classFromDb = await this.classService.findById(classId);
-    if (!classFromDb) {
-      throw new HttpException(
-        {
-          status: HttpStatus.FORBIDDEN,
-          error: "class not found!!",
-        },
-        HttpStatus.FORBIDDEN,
-      );
-    }
-    if (classFromDb.user + "" !== userFromDb._id + "") {
-      throw new HttpException(
-        {
-          status: HttpStatus.FORBIDDEN,
-          error: "You are not allowed to create activity!!",
-        },
-        HttpStatus.FORBIDDEN,
-      );
-    }
-    return await this.presenceModel.find({ class: classFromDb._id }).lean().exec();
+
+    return await this.presenceModel
+      .find({ student: new Types.ObjectId(studentId) })
+      .lean()
+      .exec();
   }
 
   async remove(classId: string, presenceId: string, studentId: string, user) {
@@ -84,7 +71,7 @@ export class PresenceService {
         HttpStatus.FORBIDDEN,
       );
     }
-    let studentFromDb = classFromDb.students.find((stu) => stu._id + "" === studentId);
+    let studentFromDb;
     if (!studentFromDb) {
       throw new HttpException(
         {

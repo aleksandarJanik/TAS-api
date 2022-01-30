@@ -6,12 +6,12 @@ import { RolesGuard } from "src/common/guards/roles.guard";
 import { CreateUserDto } from "src/user/user.model";
 import { Class, ClassDto } from "./class.model";
 import { ClassService } from "./class.service";
-import { Student, StudentDto } from "./student.model";
+import { Student, StudentDto } from "../student/student.model";
 
 @ApiTags("Class")
 @UseGuards(RolesGuard)
 @ApiBearerAuth("jwt")
-@Controller("classs")
+@Controller("class")
 export class ClassController {
   constructor(private readonly classService: ClassService) {}
 
@@ -20,7 +20,7 @@ export class ClassController {
   @ApiUnauthorizedResponse({ description: "Not Logged In!", type: HttpExceptionAnotated })
   @ApiBody({ type: ClassDto })
   @Roles("Teacher")
-  @Post("/create")
+  @Post()
   async createUser(@Body() classDto: ClassDto, @Req() req): Promise<Class> {
     return await this.classService.createClass(classDto, req.user);
   }
@@ -32,6 +32,15 @@ export class ClassController {
   @Get()
   async findAll(@Req() req): Promise<Class[]> {
     return await this.classService.findAll(req.user);
+  }
+
+  @ApiOperation({ summary: "Find Class by id" })
+  @ApiOkResponse({ description: "The Class has been successfully returned", type: [Class] })
+  @ApiUnauthorizedResponse({ description: "Not Logged In!", type: HttpExceptionAnotated })
+  @Roles("Teacher")
+  @Get(":id")
+  async findById(@Req() req, @Param("id") id: string): Promise<Class> {
+    return await this.classService.findById(id);
   }
 
   @ApiOperation({ summary: "Remove Class by id" })
@@ -51,39 +60,5 @@ export class ClassController {
   @Put(":id")
   async update(@Body() classDto: ClassDto, @Param("id") id: string, @Req() req): Promise<Class> {
     return await this.classService.update(classDto, id, req.user);
-  }
-
-  @ApiOperation({ summary: "Create new Student" })
-  @ApiOkResponse({ description: "The Student has been successfully created", type: Student })
-  @ApiUnauthorizedResponse({ description: "Not Logged In!", type: HttpExceptionAnotated })
-  @ApiBody({ type: StudentDto })
-  @Post(":classId/student")
-  async createStudent(@Body() studentDto: StudentDto, @Param("classId") classId: string): Promise<Class> {
-    return await this.classService.createStudent(studentDto, classId);
-  }
-
-  @ApiOperation({ summary: "Find all students by bulk class" })
-  @ApiOkResponse({ description: "The student list has been successfully returned", type: [Student] })
-  @ApiUnauthorizedResponse({ description: "Not Logged In!", type: HttpExceptionAnotated })
-  @Get(":classId/students")
-  async findAllStudents(@Param("classId") classId: string): Promise<Student[]> {
-    return await this.classService.findAllStudents(classId);
-  }
-
-  @ApiOperation({ summary: "Update Student by id" })
-  @ApiOkResponse({ description: "The Student has been successfully updated", type: Student })
-  @ApiUnauthorizedResponse({ description: "Not Logged In!", type: HttpExceptionAnotated })
-  @ApiBody({ type: StudentDto })
-  @Put(":classId/student/:studentId")
-  async updateStudent(@Body() studentDto: StudentDto, @Param("studentId") studentId: string, @Param("classId") classId: string): Promise<Class> {
-    return await this.classService.updateStudent(studentDto, studentId, classId);
-  }
-
-  @ApiOperation({ summary: "Remove Student by id" })
-  @ApiOkResponse({ description: "The Student has been successfully removed", type: Student })
-  @ApiUnauthorizedResponse({ description: "Not Logged In!", type: HttpExceptionAnotated })
-  @Delete(":classId/student/:studentId")
-  async removeStudent(@Param("classId") classId: string, @Param("studentId") studentId: string) {
-    return await this.classService.removeStudent(classId, studentId);
   }
 }

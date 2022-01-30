@@ -27,9 +27,9 @@ export class PresenceController {
   @ApiOkResponse({ description: "The Presence list has been successfully returned", type: [Presence] })
   @ApiUnauthorizedResponse({ description: "Not Logged In!", type: HttpExceptionAnotated })
   @Roles("Teacher")
-  @Get(":classId")
-  async findAll(@Req() req, @Param("classId") classId: string): Promise<Presence[]> {
-    return await this.presenceService.findAll(classId, req.user);
+  @Get(":studentId")
+  async findAll(@Req() req, @Param("studentId") studentId: string): Promise<Presence[]> {
+    return await this.presenceService.findAll(studentId, req.user);
   }
 
   @ApiOperation({ summary: "Remove Presence by id" })

@@ -63,9 +63,11 @@ export class AppController {
   @ApiOperation({ summary: "Generate new JWT with Refresh Token" })
   @ApiCreatedResponse({ description: "New JWT has been successfully generated", type: Token })
   @ApiUnauthorizedResponse({ description: "Refresh Token invalid or expired", type: HttpExceptionAnotated })
+  @ApiBearerAuth("jwt")
   @Post("/check-login")
   async checkLogin(@Req() req) {
-    return await this.userService.findById(req.user._id);
+    let user = await this.userService.findById(req.user._id);
+    return user;
   }
 
   @ApiOperation({ summary: "Remove Refresh Token" })

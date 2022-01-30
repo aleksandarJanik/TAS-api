@@ -3,7 +3,7 @@ import { ApiProperty } from "@nestjs/swagger";
 import { IsBoolean, IsNotEmpty, IsString } from "class-validator";
 import { Types } from "mongoose";
 import { Class } from "src/classs/class.model";
-import { Student } from "src/classs/student.model";
+import { Student } from "src/student/student.model";
 import { Question, QuestionSchema } from "src/exam/question.model";
 import { UserRole } from "src/user-role/user-role.model";
 import { User } from "src/user/user.model";

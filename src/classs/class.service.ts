@@ -3,7 +3,7 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { UserService } from "src/user/user.service";
 import { Class, ClassDocument, ClassDto } from "./class.model";
-import { Student, StudentDto } from "./student.model";
+import { Student, StudentDto } from "../student/student.model";
 
 @Injectable()
 export class ClassService {
@@ -65,54 +65,5 @@ export class ClassService {
       classFromDb.name = classDto.name;
       return await classFromDb.save();
     }
-  }
-
-  async createStudent(studentDto: StudentDto, classId: string): Promise<Class> {
-    try {
-      let classFromDb = await this.classModel.findById(classId).exec();
-
-      classFromDb.students.push(studentDto as Student);
-      let savedClass = await classFromDb.save();
-      return savedClass;
-    } catch (ex) {
-      console.log("Error create Student", ex);
-    }
-  }
-
-  async findAllStudents(classId: string): Promise<Student[]> {
-    let classFromDb = await this.classModel.findById(classId).lean().exec();
-    return classFromDb.students;
-  }
-
-  async updateStudent(studentDto: StudentDto, studentId: string, classId: string): Promise<Class> {
-    try {
-      let classFromDb = await this.classModel.findById(classId);
-      let student = classFromDb.students.find((stu) => stu._id + "" === studentId);
-      if (student) {
-        student.email = studentDto.email;
-        student.firstName = studentDto.firstName;
-        student.lastName = studentDto.lastName;
-        let savedClass = await classFromDb.save();
-        return savedClass;
-      } else {
-        throw new Error("Invalid studentId!");
-      }
-    } catch (ex) {
-      console.log("Error update student", ex);
-    }
-  }
-
-  async removeStudent(classId: string, studentId: string): Promise<Student> {
-    let studentToDelete;
-    try {
-      let classFromDb = await this.classModel.findById(classId);
-      let studentIndex = classFromDb.students.findIndex((stu) => stu._id + "" === studentId);
-      studentToDelete = classFromDb.students[studentIndex];
-      classFromDb.students.splice(studentIndex, 1);
-      await classFromDb.save();
-    } catch (ex) {
-      console.log("Error delete Student", ex);
-    }
-    return studentToDelete;
   }
 }

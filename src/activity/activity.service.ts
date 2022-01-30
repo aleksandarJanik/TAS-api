@@ -1,7 +1,8 @@
 import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { Model } from "mongoose";
+import { Model, Types } from "mongoose";
 import { ClassService } from "src/classs/class.service";
+import { StudentService } from "src/student/student.service";
 import { UserService } from "src/user/user.service";
 import { Activity, ActivityDocument, ActivityDto } from "./activity.model";
 
@@ -11,7 +12,8 @@ export class ActivityService {
     @InjectModel(Activity.name) private activityModel: Model<ActivityDocument>,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
     @Inject(forwardRef(() => ClassService)) private readonly classService: ClassService,
-  ) {}
+  ) // @Inject(forwardRef(() => StudentService)) private readonly studentService: StudentService,
+  {}
 
   async create(activityDto: ActivityDto, user): Promise<Activity> {
     let userFromDb = await this.userService.findById(user._id);
@@ -19,7 +21,7 @@ export class ActivityService {
       throw new HttpException(
         {
           status: HttpStatus.FORBIDDEN,
-          error: "Activity not found!!",
+          error: "not found!!",
         },
         HttpStatus.FORBIDDEN,
       );
@@ -39,28 +41,11 @@ export class ActivityService {
     }
   }
 
-  async findAll(classId, user): Promise<Activity[]> {
-    let userFromDb = await this.userService.findById(user._id);
-    let classFromDb = await this.classService.findById(classId);
-    if (!classFromDb) {
-      throw new HttpException(
-        {
-          status: HttpStatus.FORBIDDEN,
-          error: "class not found!!",
-        },
-        HttpStatus.FORBIDDEN,
-      );
-    }
-    if (classFromDb.user + "" !== userFromDb._id + "") {
-      throw new HttpException(
-        {
-          status: HttpStatus.FORBIDDEN,
-          error: "You are not allowed to create activity!!",
-        },
-        HttpStatus.FORBIDDEN,
-      );
-    }
-    return await this.activityModel.find({ class: classFromDb._id }).lean().exec();
+  async findAll(studentId, user): Promise<Activity[]> {
+    return await this.activityModel
+      .find({ student: new Types.ObjectId(studentId) })
+      .lean()
+      .exec();
   }
 
   async remove(classId: string, activityId: string, studentId: string, user) {
@@ -84,7 +69,7 @@ export class ActivityService {
         HttpStatus.FORBIDDEN,
       );
     }
-    let studentFromDb = classFromDb.students.find((stu) => stu._id + "" === studentId);
+    let studentFromDb;
     if (!studentFromDb) {
       throw new HttpException(
         {
@@ -116,7 +101,7 @@ export class ActivityService {
       throw new HttpException(
         {
           status: HttpStatus.FORBIDDEN,
-          error: "Exam not found!!",
+          error: "Not permissions!!",
         },
         HttpStatus.FORBIDDEN,
       );

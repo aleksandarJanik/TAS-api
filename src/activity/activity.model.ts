@@ -3,8 +3,7 @@ import { ApiProperty } from "@nestjs/swagger";
 import { IsNotEmpty, IsNumber, IsString } from "class-validator";
 import { Types } from "mongoose";
 import { Class } from "src/classs/class.model";
-import { Student } from "src/classs/student.model";
-import { User } from "src/user/user.model";
+import { Student } from "src/student/student.model";
 
 export type ActivityDocument = Activity & Document;
 
@@ -13,9 +12,9 @@ export class Activity {
   @ApiProperty({ type: String })
   _id: Types.ObjectId;
 
-  @ApiProperty({ type: Number })
+  @ApiProperty({ type: String })
   @Prop({})
-  grade: number;
+  grade: string;
 
   @ApiProperty({ type: Class })
   @Prop({ type: Types.ObjectId, ref: "Class" })
@@ -42,10 +41,9 @@ export class ActivityDto {
   @IsString()
   name: string;
 
-  @ApiProperty({ type: Number })
+  @ApiProperty({ type: String })
   @IsNotEmpty()
-  @IsNumber()
-  grade: number;
+  grade: string;
 
   @ApiProperty({ type: String })
   @IsNotEmpty()

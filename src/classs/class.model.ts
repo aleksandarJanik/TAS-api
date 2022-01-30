@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { ApiProperty } from "@nestjs/swagger";
 import { IsNotEmpty, IsString } from "class-validator";
 import { Types } from "mongoose";
-import { Student, StudentSchema } from "src/classs/student.model";
+import { Student, StudentSchema } from "src/student/student.model";
 import { UserRole } from "src/user-role/user-role.model";
 import { User } from "src/user/user.model";
 
@@ -24,9 +24,6 @@ export class Class {
   @ApiProperty({ type: [User] })
   @Prop({ type: Types.ObjectId, ref: "User" })
   user: User | Types.ObjectId;
-
-  @Prop({ type: [StudentSchema], default: [] })
-  students: Student[];
 }
 
 export class ClassDto {
