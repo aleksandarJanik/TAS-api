@@ -27,8 +27,8 @@ export class Student {
   @Prop({ index: true })
   email: string;
 
-  @ApiProperty({ type: [Class] })
-  @Prop({ type: Types.ObjectId, ref: "Class" })
+  @ApiProperty({ type: String })
+  @Prop({ type: Types.ObjectId, ref: "Class", index: true })
   class: Class | Types.ObjectId;
 
   activities: Activity[];
@@ -54,7 +54,7 @@ export class StudentDto {
 
   @ApiProperty({ type: String })
   @IsNotEmpty()
-  user: Types.ObjectId;
+  class: Types.ObjectId;
 }
 
 export const StudentSchema = SchemaFactory.createForClass(Student);
@@ -64,4 +64,11 @@ StudentSchema.pre("save", function (next) {
   this.class = this.class ? Types.ObjectId(this.class) : this.class;
 
   next();
+});
+
+StudentSchema.virtual("activities", {
+  ref: "Activity",
+  localField: "_id",
+  foreignField: "student",
+  // populate: ["globalRarity"], // virtual
 });

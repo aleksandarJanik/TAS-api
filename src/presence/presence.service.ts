@@ -12,8 +12,8 @@ export class PresenceService {
     @InjectModel(Presence.name) private presenceModel: Model<PresenceDocument>,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
     @Inject(forwardRef(() => ClassService)) private readonly classService: ClassService,
-  ) // @Inject(forwardRef(() => StudentService)) private readonly studentService: StudentService,
-  {}
+    @Inject(forwardRef(() => StudentService)) private readonly studentService: StudentService,
+  ) {}
 
   async create(presenceDto: PresenceDto, user): Promise<Presence> {
     let userFromDb = await this.userService.findById(user._id);

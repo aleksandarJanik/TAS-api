@@ -4,7 +4,7 @@ import { Roles } from "src/common/decorators/roles.decorator";
 import { HttpExceptionAnotated } from "src/common/global-models/exception";
 import { RolesGuard } from "src/common/guards/roles.guard";
 import { CreateUserDto } from "src/user/user.model";
-import { Class, ClassDto } from "./class.model";
+import { Class, ClassDto, ClassWithStats } from "./class.model";
 import { ClassService } from "./class.service";
 import { Student, StudentDto } from "../student/student.model";
 
@@ -32,6 +32,14 @@ export class ClassController {
   @Get()
   async findAll(@Req() req): Promise<Class[]> {
     return await this.classService.findAll(req.user);
+  }
+  @ApiOperation({ summary: "Find all Classes by user with stats" })
+  @ApiOkResponse({ description: "The Class list has been successfully returned", type: [ClassWithStats] })
+  @ApiUnauthorizedResponse({ description: "Not Logged In!", type: HttpExceptionAnotated })
+  @Roles("Teacher")
+  @Get("with-statistics")
+  async findAllWithStatistics(@Req() req): Promise<ClassWithStats[]> {
+    return await this.classService.findAllWtihStatistics(req.user);
   }
 
   @ApiOperation({ summary: "Find Class by id" })

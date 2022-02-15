@@ -12,8 +12,8 @@ export class ActivityService {
     @InjectModel(Activity.name) private activityModel: Model<ActivityDocument>,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
     @Inject(forwardRef(() => ClassService)) private readonly classService: ClassService,
-  ) // @Inject(forwardRef(() => StudentService)) private readonly studentService: StudentService,
-  {}
+    @Inject(forwardRef(() => StudentService)) private readonly studentService: StudentService,
+  ) {}
 
   async create(activityDto: ActivityDto, user): Promise<Activity> {
     let userFromDb = await this.userService.findById(user._id);
@@ -69,7 +69,7 @@ export class ActivityService {
         HttpStatus.FORBIDDEN,
       );
     }
-    let studentFromDb;
+    let studentFromDb = await this.studentService.findByid(studentId);
     if (!studentFromDb) {
       throw new HttpException(
         {

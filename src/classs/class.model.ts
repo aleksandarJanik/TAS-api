@@ -37,4 +37,13 @@ export class ClassDto {
   user: Types.ObjectId;
 }
 
+export class ClassWithStats extends Class {
+  averageGrade: number;
+  numGradeOne: number;
+  numGradeTwo: number;
+  numGradeThree: number;
+  numGradeFour: number;
+  numGradeFive: number;
+}
+
 export const ClassSchema = SchemaFactory.createForClass(Class);

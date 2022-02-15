@@ -16,16 +16,24 @@ export class StudentController {
   @ApiUnauthorizedResponse({ description: "Not Logged In!", type: HttpExceptionAnotated })
   @ApiBody({ type: StudentDto })
   @Post()
-  async createStudent(@Body() studentDto: StudentDto, @Param("classId") classId: string): Promise<Student> {
-    return await this.studentService.createStudent(studentDto);
+  async createStudent(@Body() studentDto: StudentDto, @Req() req): Promise<Student> {
+    return await this.studentService.createStudent(studentDto, req.user);
   }
 
-  @ApiOperation({ summary: "Find all students by bulk class" })
+  @ApiOperation({ summary: "Find all students by class" })
   @ApiOkResponse({ description: "The student list has been successfully returned", type: [Student] })
   @ApiUnauthorizedResponse({ description: "Not Logged In!", type: HttpExceptionAnotated })
-  @Get(":classId/students")
+  @Get(":classId")
   async findAllStudents(@Param("classId") classId: string): Promise<Student[]> {
     return await this.studentService.findAllStudents(classId);
+  }
+
+  @ApiOperation({ summary: "Find student by id" })
+  @ApiOkResponse({ description: "The student has been successfully returned", type: Student })
+  @ApiUnauthorizedResponse({ description: "Not Logged In!", type: HttpExceptionAnotated })
+  @Get("findOne/:studentId")
+  async findbyId(@Param("studentId") studentId: string): Promise<Student> {
+    return await this.studentService.findByid(studentId);
   }
 
   @ApiOperation({ summary: "Update Student by id" })
@@ -33,15 +41,15 @@ export class StudentController {
   @ApiUnauthorizedResponse({ description: "Not Logged In!", type: HttpExceptionAnotated })
   @ApiBody({ type: StudentDto })
   @Put(":studentId")
-  async updateStudent(@Body() studentDto: StudentDto, @Param("studentId") studentId: string, @Param("classId") classId: string): Promise<Student> {
-    return await this.studentService.updateStudent(studentDto, studentId, classId);
+  async updateStudent(@Body() studentDto: StudentDto, @Param("studentId") studentId: string, @Req() req): Promise<Student> {
+    return await this.studentService.updateStudent(studentDto, studentId, req.user);
   }
 
   @ApiOperation({ summary: "Remove Student by id" })
   @ApiOkResponse({ description: "The Student has been successfully removed", type: Student })
   @ApiUnauthorizedResponse({ description: "Not Logged In!", type: HttpExceptionAnotated })
-  @Delete(":studentId")
-  async removeStudent(@Param("studentId") studentId: string) {
-    return await this.studentService.removeStudent(studentId);
+  @Delete(":studentId/class/:classId")
+  async removeStudent(@Param("studentId") studentId: string, @Param("classId") classId: string, @Req() req) {
+    return await this.studentService.removeStudent(studentId, classId, req.user);
   }
 }
