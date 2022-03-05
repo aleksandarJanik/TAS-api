@@ -1,9 +1,10 @@
 import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { Model } from "mongoose";
+import { Model, Types } from "mongoose";
+import { title } from "process";
 import { UserService } from "src/user/user.service";
-import { Exam, ExamDocument, ExamDto } from "./exam.model";
-import { Question, QuestionDto } from "./question.model";
+import { Exam, ExamDocument, ExamDto, UpdateSettingsExamDto } from "./exam.model";
+import { Question, QuestionCreateDto, QuestionUpdateDto } from "./question.model";
 
 @Injectable()
 export class ExamService {
@@ -26,9 +27,38 @@ export class ExamService {
   }
 
   async findAll(user): Promise<Exam[]> {
-    let userFromDb = await this.userService.findById(user._id);
-    let exams = await this.examModel.find({ user: userFromDb._id }).lean().exec();
-    return exams;
+    try {
+      let userFromDb = await this.userService.findById(user._id);
+      let exams = await this.examModel.find({ user: userFromDb._id }).lean().exec();
+      return exams;
+    } catch (e) {
+      throw new HttpException(
+        {
+          status: HttpStatus.FORBIDDEN,
+          error: "User not found!!",
+        },
+        HttpStatus.FORBIDDEN,
+      );
+    }
+  }
+
+  async findOne(examId: string, userId) {
+    try {
+      console.log(examId);
+      let exam = await this.examModel
+        .findOne({ user: new Types.ObjectId(userId._id), _id: new Types.ObjectId(examId) })
+        .lean()
+        .exec();
+      return exam;
+    } catch (e) {
+      throw new HttpException(
+        {
+          status: HttpStatus.FORBIDDEN,
+          error: "Exam not found!!",
+        },
+        HttpStatus.FORBIDDEN,
+      );
+    }
   }
 
   async remove(examId: string, user) {
@@ -64,7 +94,40 @@ export class ExamService {
     }
   }
 
-  async createQuestion(questionDto: QuestionDto, examId: string): Promise<Exam> {
+  async updateDescription(description: string, examId: string, user): Promise<Exam> {
+    let userFromDb = await this.userService.findById(user._id);
+    let examFromDb = await this.examModel.findById(examId);
+    if (examFromDb.user + "" !== userFromDb._id + "") {
+      throw new HttpException(
+        {
+          status: HttpStatus.FORBIDDEN,
+          error: "Exam not found!!",
+        },
+        HttpStatus.FORBIDDEN,
+      );
+    } else {
+      examFromDb.description = description;
+      return await examFromDb.save();
+    }
+  }
+  async updateTitle(title: string, examId: string, user): Promise<Exam> {
+    let userFromDb = await this.userService.findById(user._id);
+    let examFromDb = await this.examModel.findById(examId);
+    if (examFromDb.user + "" !== userFromDb._id + "") {
+      throw new HttpException(
+        {
+          status: HttpStatus.FORBIDDEN,
+          error: "Exam not found!!",
+        },
+        HttpStatus.FORBIDDEN,
+      );
+    } else {
+      examFromDb.name = title;
+      return await examFromDb.save();
+    }
+  }
+
+  async createQuestion(questionDto: QuestionCreateDto, examId: string): Promise<Exam> {
     try {
       let examFromDb = await this.examModel.findById(examId).exec();
       examFromDb.questions.push(questionDto as Question);
@@ -80,13 +143,16 @@ export class ExamService {
     return examFromDb.questions;
   }
 
-  async updateQuestion(questionDto: QuestionDto, questionId: string, examId: string): Promise<Exam> {
+  async updateQuestion(questionDto: QuestionUpdateDto, questionId: string, examId: string): Promise<Exam> {
     try {
       let examFromDb = await this.examModel.findById(examId);
       let question = examFromDb.questions.find((q) => q._id + "" === questionId);
       if (question) {
         question.question = questionDto.question;
         question.type = questionDto.type;
+        question.answers = questionDto.answers;
+        question.correctAnswers = questionDto.correctAnswers;
+        question.isRequired = questionDto.isRequired;
         let savedExam = await examFromDb.save();
         return savedExam;
       } else {
@@ -97,8 +163,19 @@ export class ExamService {
     }
   }
 
-  async removeQuestion(examId: string, questionId: string): Promise<Question> {
+  async removeQuestion(examId: string, questionId: string, user): Promise<Question> {
     let questionToDelete;
+    let userFromDb = await this.userService.findById(user._id);
+    let examFromDb = await this.examModel.findById(examId);
+    if (examFromDb.user + "" !== userFromDb._id + "") {
+      throw new HttpException(
+        {
+          status: HttpStatus.FORBIDDEN,
+          error: "Exam not found!!",
+        },
+        HttpStatus.FORBIDDEN,
+      );
+    }
     try {
       let examFromDb = await this.examModel.findById(examId);
       let questionIndex = examFromDb.questions.findIndex((q) => q._id + "" === questionId);
@@ -109,5 +186,42 @@ export class ExamService {
       console.log("Error delete Question", ex);
     }
     return questionToDelete;
+  }
+
+  async updateExamSettings(updateSettingsExamDto: UpdateSettingsExamDto, examId: string, user) {
+    let userFromDb = await this.userService.findById(user._id);
+    let examFromDb = await this.examModel.findById(examId);
+    if (examFromDb.user + "" !== userFromDb._id + "") {
+      throw new HttpException(
+        {
+          status: HttpStatus.FORBIDDEN,
+          error: "Exam not found!!",
+        },
+        HttpStatus.FORBIDDEN,
+      );
+    }
+    if (updateSettingsExamDto.time && this.checkValidationForTime(updateSettingsExamDto.time)) {
+      examFromDb.time = updateSettingsExamDto.time;
+      examFromDb.hasTimeLimit = updateSettingsExamDto.hasTimeLimit;
+    }
+    examFromDb.grade1 = updateSettingsExamDto.grade1;
+    examFromDb.grade2 = updateSettingsExamDto.grade2;
+    examFromDb.grade3 = updateSettingsExamDto.grade3;
+    examFromDb.grade4 = updateSettingsExamDto.grade4;
+    examFromDb.grade5 = updateSettingsExamDto.grade5;
+    examFromDb.showResutPage = updateSettingsExamDto.showResutPage;
+
+    return await examFromDb.save();
+  }
+
+  checkValidationForTime(time: string) {
+    let firstChar = time.split("")[0];
+    let secondChar = time.split("")[1];
+    let thirdChar = time.split("")[2];
+    let fourChar = time.split("")[3];
+    let fiveChar = time.split("")[4];
+    if (time.split("").length !== 5 || isNaN(parseInt(firstChar)) || isNaN(parseInt(secondChar)) || thirdChar !== ":" || isNaN(parseInt(fourChar)) || isNaN(parseInt(fiveChar))) {
+      return false;
+    } else return true;
   }
 }

@@ -9,6 +9,7 @@ import { ExamModule } from "./exam/exam.module";
 import { PresenceModule } from "./presence/presence.module";
 import { ActivityModule } from "./activity/activity.module";
 import { ClassModule } from "./classs/class.module";
+import { NoteModule } from "./note/note.module";
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { ClassModule } from "./classs/class.module";
     UserModule,
     AuthModule,
     ExamModule,
+    NoteModule,
     PresenceModule,
     ActivityModule,
     ClassModule,
