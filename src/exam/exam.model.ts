@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { ApiProperty } from "@nestjs/swagger";
-import { IsBoolean, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { Type } from "class-transformer";
+import { ArrayMinSize, IsArray, IsBoolean, IsNotEmpty, IsNumber, IsOptional, IsString, ValidateNested } from "class-validator";
 import { Types } from "mongoose";
 import { Question, QuestionSchema } from "src/exam/question.model";
 import { UserRole } from "src/user-role/user-role.model";
@@ -117,6 +118,29 @@ export class UpdateSettingsExamDto {
   @IsNotEmpty()
   @IsBoolean()
   showResutPage: boolean;
+}
+
+export class ChoosenQuestion {
+  @IsOptional()
+  answers: string[];
+
+  @IsString()
+  @IsNotEmpty()
+  questionId: string;
+}
+export class FinishedExamDto {
+  @ApiProperty({ type: [ChoosenQuestion] })
+  @IsNotEmpty()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @ArrayMinSize(1)
+  @Type(() => ChoosenQuestion)
+  questions: ChoosenQuestion[];
+
+  @ApiProperty({ type: String })
+  @IsString()
+  @IsNotEmpty()
+  studentSpecialTokenId: string;
 }
 
 export const ExamSchema = SchemaFactory.createForClass(Exam);

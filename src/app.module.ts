@@ -10,6 +10,7 @@ import { PresenceModule } from "./presence/presence.module";
 import { ActivityModule } from "./activity/activity.module";
 import { ClassModule } from "./classs/class.module";
 import { NoteModule } from "./note/note.module";
+import { StudentSpecialTokenModule } from './student-special-token/student-special-token.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { NoteModule } from "./note/note.module";
     PresenceModule,
     ActivityModule,
     ClassModule,
+    StudentSpecialTokenModule,
   ],
   controllers: [AppController],
   providers: [AppService],

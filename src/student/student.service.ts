@@ -42,8 +42,18 @@ export class StudentService {
   }
 
   async findByid(studentId: string) {
-    let student = await this.studentModel.findById(studentId).populate("activities").lean().exec();
-    return student;
+    try {
+      let student = await this.studentModel.findById(studentId).populate("activities").lean().exec();
+      return student;
+    } catch (e) {
+      throw new HttpException(
+        {
+          status: HttpStatus.NOT_FOUND,
+          error: "student not found!!",
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
   }
 
   async updateStudent(studentDto: StudentDto, studentId: string, user): Promise<Student> {

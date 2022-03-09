@@ -44,9 +44,8 @@ export class ExamService {
 
   async findOne(examId: string, userId) {
     try {
-      console.log(examId);
       let exam = await this.examModel
-        .findOne({ user: new Types.ObjectId(userId._id), _id: new Types.ObjectId(examId) })
+        .findOne({ user: new Types.ObjectId(userId), _id: new Types.ObjectId(examId) })
         .lean()
         .exec();
       return exam;

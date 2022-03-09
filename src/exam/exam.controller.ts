@@ -1,5 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Req, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiBody, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags, ApiUnauthorizedResponse } from "@nestjs/swagger";
+import { Public } from "src/auth/constants";
 import { Roles } from "src/common/decorators/roles.decorator";
 import { HttpExceptionAnotated } from "src/common/global-models/exception";
 import { RolesGuard } from "src/common/guards/roles.guard";
@@ -29,7 +30,15 @@ export class ExamController {
   @Roles("Teacher")
   @Get(":examId")
   async findOne(@Req() req, @Param("examId") examId: string): Promise<Exam> {
-    return await this.examService.findOne(examId, req.user);
+    return await this.examService.findOne(examId, req.user._id);
+  }
+
+  @Public()
+  @ApiOperation({ summary: "Find Exams by id" })
+  @ApiOkResponse({ description: "The Exam has been successfully returned", type: Exam })
+  @Get(":examId/teacher/:teacherId")
+  async findToStartQuiz(@Param("examId") examId: string, @Param("teacherId") teacherId: string): Promise<Exam> {
+    return await this.examService.findOne(examId, teacherId);
   }
 
   @ApiOperation({ summary: "Find all Exams by user" })

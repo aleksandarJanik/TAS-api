@@ -104,6 +104,7 @@ export class ClassService {
           name: classs.name,
           school: classs.school,
           user: classs.user,
+          studentSpecialTokens: classs.studentSpecialTokens,
           averageGrade: avgclass,
           numGradeFive: stNumWithfive,
           numGradeFour: stNumWithFour,
