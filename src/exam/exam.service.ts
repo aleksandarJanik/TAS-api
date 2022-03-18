@@ -46,6 +46,7 @@ export class ExamService {
     try {
       let exam = await this.examModel
         .findOne({ user: new Types.ObjectId(userId), _id: new Types.ObjectId(examId) })
+        .populate("questions")
         .lean()
         .exec();
       return exam;

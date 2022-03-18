@@ -5,6 +5,8 @@ import { Types } from "mongoose";
 import { Activity } from "src/activity/activity.model";
 import { Class } from "src/classs/class.model";
 import { EmailExists } from "src/common/decorators/emailExist.decorator";
+import { Result } from "src/result/result.model";
+import { StudentSpecialToken } from "src/student-special-token/student-special-token.model";
 import { UserRole } from "src/user-role/user-role.model";
 import { User } from "src/user/user.model";
 
@@ -32,6 +34,10 @@ export class Student {
   class: Class | Types.ObjectId;
 
   activities: Activity[];
+
+  results: Result[];
+
+  tokens: StudentSpecialToken[];
 }
 
 export class StudentDto {
@@ -68,6 +74,20 @@ StudentSchema.pre("save", function (next) {
 
 StudentSchema.virtual("activities", {
   ref: "Activity",
+  localField: "_id",
+  foreignField: "student",
+  // populate: ["globalRarity"], // virtual
+});
+
+StudentSchema.virtual("results", {
+  ref: "Result",
+  localField: "_id",
+  foreignField: "student",
+  // populate: ["globalRarity"], // virtual
+});
+
+StudentSchema.virtual("tokens", {
+  ref: "StudentSpecialToken",
   localField: "_id",
   foreignField: "student",
   // populate: ["globalRarity"], // virtual

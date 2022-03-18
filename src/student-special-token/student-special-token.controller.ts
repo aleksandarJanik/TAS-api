@@ -44,13 +44,13 @@ export class StudentSpecialTokenController {
   async findOne(@Param("specialTokenId") specialTokenId: string): Promise<StudentSpecialToken> {
     return await this.studentSpecialTokenService.findById(specialTokenId);
   }
-  @Public()
+
   @ApiOperation({ summary: "Remove Special Token for student by id" })
   @ApiOkResponse({ description: "The Special Token for student has been successfully removed", type: StudentSpecialToken })
   @ApiUnauthorizedResponse({ description: "Not Logged In!", type: HttpExceptionAnotated })
   @Delete(":id")
   async remove(@Param("id") id: string, @Req() req) {
-    return await this.studentSpecialTokenService.remove(id);
+    return await this.studentSpecialTokenService.remove(id, req.user._id);
   }
 
   @Public()

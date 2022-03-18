@@ -15,8 +15,8 @@ export class ActivityService {
     @Inject(forwardRef(() => StudentService)) private readonly studentService: StudentService,
   ) {}
 
-  async create(activityDto: ActivityDto, user): Promise<Activity> {
-    let userFromDb = await this.userService.findById(user._id);
+  async create(activityDto: ActivityDto, userId): Promise<Activity> {
+    let userFromDb = await this.userService.findById(userId);
     if (!userFromDb) {
       throw new HttpException(
         {

@@ -127,6 +127,8 @@ export class ChoosenQuestion {
   @IsString()
   @IsNotEmpty()
   questionId: string;
+
+  isCorrect: boolean;
 }
 export class FinishedExamDto {
   @ApiProperty({ type: [ChoosenQuestion] })

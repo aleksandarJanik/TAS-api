@@ -36,6 +36,8 @@ export class StudentService {
     let students = await this.studentModel
       .find({ class: new Types.ObjectId(classId) })
       .populate("activities")
+      .populate("results")
+      .populate({ path: "tokens", populate: { path: "exam" } })
       .lean()
       .exec();
     return students;
@@ -43,7 +45,12 @@ export class StudentService {
 
   async findByid(studentId: string) {
     try {
-      let student = await this.studentModel.findById(studentId).populate("activities").lean().exec();
+      let student = await this.studentModel
+        .findById(studentId)
+        .populate("activities")
+        .populate({ path: "tokens", populate: { path: "exam" } })
+        .lean()
+        .exec();
       return student;
     } catch (e) {
       throw new HttpException(

@@ -11,6 +11,7 @@ import { ActivityModule } from "./activity/activity.module";
 import { ClassModule } from "./classs/class.module";
 import { NoteModule } from "./note/note.module";
 import { StudentSpecialTokenModule } from './student-special-token/student-special-token.module';
+import { ResultModule } from './result/result.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { StudentSpecialTokenModule } from './student-special-token/student-speci
     ActivityModule,
     ClassModule,
     StudentSpecialTokenModule,
+    ResultModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -24,6 +24,16 @@ export class ClassService {
         HttpStatus.FORBIDDEN,
       );
     }
+    let classExist = await this.classModel.findOne({ name: classDto.name });
+    if (classExist) {
+      throw new HttpException(
+        {
+          status: HttpStatus.FORBIDDEN,
+          error: "Your already add class with that name!!",
+        },
+        HttpStatus.FORBIDDEN,
+      );
+    }
     classDto.school = userFromDb.school;
     classDto.user = userFromDb._id;
     let createdClass = await this.classModel.create(classDto);

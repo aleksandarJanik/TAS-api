@@ -21,7 +21,7 @@ export class ActivityController {
   @Roles("Teacher")
   @Post()
   async create(@Body() activityDto: ActivityDto, @Req() req): Promise<Activity> {
-    return await this.activityService.create(activityDto, req.user);
+    return await this.activityService.create(activityDto, req.user._id);
   }
 
   @ApiOperation({ summary: "Find all activities by user" })

@@ -1,9 +1,15 @@
 import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
+import { ActivityDto } from "src/activity/activity.model";
+import { ActivityService } from "src/activity/activity.service";
+import { Class } from "src/classs/class.model";
 import { ClassService } from "src/classs/class.service";
-import { FinishedExamDto } from "src/exam/exam.model";
+import { ChoosenQuestion, Exam, FinishedExamDto } from "src/exam/exam.model";
 import { ExamService } from "src/exam/exam.service";
+import { Question, TypeQuestion } from "src/exam/question.model";
+import { CountingExam, ResultDto } from "src/result/result.model";
+import { ResultService } from "src/result/result.service";
 import { StudentService } from "src/student/student.service";
 import { UserService } from "src/user/user.service";
 import { SaveTimeDto, StudentSpecialToken, StudentSpecialTokenDocument, StudentSpecialTokenDto } from "./student-special-token.model";
@@ -16,6 +22,8 @@ export class StudentSpecialTokenService {
     @Inject(forwardRef(() => ClassService)) private readonly classService: ClassService,
     @Inject(forwardRef(() => StudentService)) private readonly studentService: StudentService,
     @Inject(forwardRef(() => ExamService)) private readonly examService: ExamService,
+    @Inject(forwardRef(() => ResultService)) private readonly resultService: ResultService,
+    @Inject(forwardRef(() => ActivityService)) private readonly activityService: ActivityService,
   ) {}
 
   async create(studentSpecialTokenDto: StudentSpecialTokenDto, user): Promise<StudentSpecialToken> {
@@ -101,9 +109,9 @@ export class StudentSpecialTokenService {
       );
     }
   }
-  async remove(studentSpecialTokenId: string) {
+  async remove(studentSpecialTokenId: string, userId: string) {
     try {
-      return await this.studentSpecialTokenModel.deleteOne({ _id: new Types.ObjectId(studentSpecialTokenId) });
+      return await this.studentSpecialTokenModel.deleteOne({ _id: new Types.ObjectId(studentSpecialTokenId), user: new Types.ObjectId(userId) });
     } catch (e) {
       throw new HttpException(
         {
@@ -121,5 +129,95 @@ export class StudentSpecialTokenService {
     return await token.save();
   }
 
-  finishExam(finishedExamDto: FinishedExamDto) {}
+  async finishExam(finishedExamDto: FinishedExamDto) {
+    let token = await this.studentSpecialTokenModel.findById(finishedExamDto.studentSpecialTokenId).populate("class").exec();
+    let examFromDb = await this.examService.findOne(token.exam + "", token.user);
+    let obj: CountingExam = this.countResultsForStudent(finishedExamDto.questions, examFromDb.questions, examFromDb);
+    let result: ResultDto = {
+      class: token.class._id as Types.ObjectId,
+      exam: token.exam as Types.ObjectId,
+      user: token.user as Types.ObjectId,
+      student: token.student as Types.ObjectId,
+      questionsFromStudent: finishedExamDto.questions,
+      numCorrectAnswers: obj.correctAnswers,
+      grade: obj.grade,
+      gradePercentage: obj.percentage,
+      className: token.class["name"],
+    };
+    let activityDto: ActivityDto = {
+      class: token.class._id as Types.ObjectId,
+      grade: obj.grade + "",
+      name: examFromDb.name,
+      student: token.student as Types.ObjectId,
+    };
+    try {
+      await this.remove(token._id + "", token.user + "");
+      await this.activityService.create(activityDto, token.user + "");
+      return await this.resultService.create(result);
+    } catch (e) {}
+  }
+
+  countResultsForStudent(questionsStudent: ChoosenQuestion[], examQuestions: Question[], examFromDb: Exam) {
+    let correctAnswers = 0;
+    for (let questinStudent of questionsStudent) {
+      if (questinStudent.answers.length === 0) {
+        continue;
+      }
+      let questionFromExam = examQuestions.find((q) => q._id + "" === questinStudent.questionId);
+      if (!questionFromExam) {
+        console.log("question doesnt exis in exam");
+        continue;
+      }
+      if (questionFromExam.type !== TypeQuestion.CHECKBOXES) {
+        let isCorrect = questionFromExam.correctAnswers.some((answer) => answer === questinStudent.answers[0]);
+        if (isCorrect) {
+          correctAnswers++;
+          questinStudent.isCorrect = true;
+        } else {
+          questinStudent.isCorrect = false;
+        }
+      } else {
+        if (questinStudent.answers.length !== questionFromExam.correctAnswers.length) {
+          questinStudent.isCorrect = false;
+          continue;
+        }
+        let allCorrect = true;
+        for (let a of questinStudent.answers) {
+          let isCorrect = questionFromExam.correctAnswers.some((answer) => answer === a);
+          if (!isCorrect) {
+            allCorrect = false;
+          }
+        }
+        if (allCorrect) {
+          correctAnswers++;
+          questinStudent.isCorrect = true;
+        } else {
+          questinStudent.isCorrect = false;
+        }
+      }
+    }
+    let percentage = (correctAnswers / examQuestions.length) * 100;
+    let grade;
+    if (examFromDb.grade1 >= percentage && examFromDb.grade2 > percentage) {
+      grade = 1;
+    } else if (examFromDb.grade2 >= percentage && examFromDb.grade3 > percentage) {
+      grade = 2;
+    } else if (examFromDb.grade3 >= percentage && examFromDb.grade4 > percentage) {
+      grade = 3;
+    } else if (examFromDb.grade4 >= percentage && examFromDb.grade5 > percentage) {
+      grade = 4;
+    } else if (examFromDb.grade5 <= percentage) {
+      grade = 5;
+    }
+
+    // console.log("grade", grade);
+    // console.log("percentage", percentage);
+    // console.log("correctAnswers", correctAnswers);
+    let countingExam: CountingExam = {
+      correctAnswers: correctAnswers,
+      grade: grade,
+      percentage: percentage,
+    };
+    return countingExam;
+  }
 }

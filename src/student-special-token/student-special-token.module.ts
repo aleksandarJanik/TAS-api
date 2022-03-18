@@ -1,7 +1,9 @@
 import { forwardRef, Module } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
+import { ActivityModule } from "src/activity/activity.module";
 import { ClassModule } from "src/classs/class.module";
 import { ExamModule } from "src/exam/exam.module";
+import { ResultModule } from "src/result/result.module";
 import { StudentModule } from "src/student/student.module";
 import { UserModule } from "src/user/user.module";
 import { StudentSpecialTokenController } from "./student-special-token.controller";
@@ -15,6 +17,8 @@ import { StudentSpecialTokenService } from "./student-special-token.service";
     forwardRef(() => ClassModule),
     forwardRef(() => ExamModule),
     forwardRef(() => StudentModule),
+    forwardRef(() => ResultModule),
+    forwardRef(() => ActivityModule),
   ],
   controllers: [StudentSpecialTokenController],
   providers: [StudentSpecialTokenService],
