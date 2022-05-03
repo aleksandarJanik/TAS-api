@@ -17,11 +17,11 @@ async function bootstrap() {
   app.use(json({ limit: "10MB" }));
   app.use(compression());
   app.use(urlencoded({ extended: true, limit: "10MB" }));
-  app.use(
-    helmet({
-      contentSecurityPolicy: false,
-    }),
-  );
+  // app.use(
+  //   helmet({
+  //     contentSecurityPolicy: false,
+  //   }),
+  // );
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

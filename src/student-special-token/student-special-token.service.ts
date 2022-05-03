@@ -8,9 +8,13 @@ import { ClassService } from "src/classs/class.service";
 import { ChoosenQuestion, Exam, FinishedExamDto } from "src/exam/exam.model";
 import { ExamService } from "src/exam/exam.service";
 import { Question, TypeQuestion } from "src/exam/question.model";
+import { NotificationDto } from "src/notification/notification.model";
+import { NotificationService } from "src/notification/notification.service";
 import { CountingExam, ResultDto } from "src/result/result.model";
 import { ResultService } from "src/result/result.service";
+import { Student } from "src/student/student.model";
 import { StudentService } from "src/student/student.service";
+import { Token } from "src/user/user.model";
 import { UserService } from "src/user/user.service";
 import { SaveTimeDto, StudentSpecialToken, StudentSpecialTokenDocument, StudentSpecialTokenDto } from "./student-special-token.model";
 
@@ -24,6 +28,7 @@ export class StudentSpecialTokenService {
     @Inject(forwardRef(() => ExamService)) private readonly examService: ExamService,
     @Inject(forwardRef(() => ResultService)) private readonly resultService: ResultService,
     @Inject(forwardRef(() => ActivityService)) private readonly activityService: ActivityService,
+    @Inject(forwardRef(() => NotificationService)) private readonly notificationService: NotificationService,
   ) {}
 
   async create(studentSpecialTokenDto: StudentSpecialTokenDto, user): Promise<StudentSpecialToken> {
@@ -130,14 +135,15 @@ export class StudentSpecialTokenService {
   }
 
   async finishExam(finishedExamDto: FinishedExamDto) {
-    let token = await this.studentSpecialTokenModel.findById(finishedExamDto.studentSpecialTokenId).populate("class").exec();
+    let token = await this.studentSpecialTokenModel.findById(finishedExamDto.studentSpecialTokenId).populate("class").populate("student").exec();
+    let student: Student = token.student as Student;
     let examFromDb = await this.examService.findOne(token.exam + "", token.user);
     let obj: CountingExam = this.countResultsForStudent(finishedExamDto.questions, examFromDb.questions, examFromDb);
     let result: ResultDto = {
       class: token.class._id as Types.ObjectId,
       exam: token.exam as Types.ObjectId,
       user: token.user as Types.ObjectId,
-      student: token.student as Types.ObjectId,
+      student: token.student._id as Types.ObjectId,
       questionsFromStudent: finishedExamDto.questions,
       numCorrectAnswers: obj.correctAnswers,
       grade: obj.grade,
@@ -148,11 +154,18 @@ export class StudentSpecialTokenService {
       class: token.class._id as Types.ObjectId,
       grade: obj.grade + "",
       name: examFromDb.name,
-      student: token.student as Types.ObjectId,
+      student: token.student._id as Types.ObjectId,
+    };
+    let notificationDto: NotificationDto = {
+      isNew: true,
+      message: `Student ${student.firstName} ${student.lastName} finish the exam ${examFromDb.name}`,
+      user: token.user as Types.ObjectId,
+      quiz: token.exam as Types.ObjectId,
     };
     try {
       await this.remove(token._id + "", token.user + "");
       await this.activityService.create(activityDto, token.user + "");
+      await this.notificationService.create(notificationDto);
       return await this.resultService.create(result);
     } catch (e) {}
   }

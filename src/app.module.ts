@@ -12,6 +12,7 @@ import { ClassModule } from "./classs/class.module";
 import { NoteModule } from "./note/note.module";
 import { StudentSpecialTokenModule } from './student-special-token/student-special-token.module';
 import { ResultModule } from './result/result.module';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { ResultModule } from './result/result.module';
     ClassModule,
     StudentSpecialTokenModule,
     ResultModule,
+    NotificationModule,
   ],
   controllers: [AppController],
   providers: [AppService],
