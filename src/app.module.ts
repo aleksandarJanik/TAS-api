@@ -10,9 +10,10 @@ import { PresenceModule } from "./presence/presence.module";
 import { ActivityModule } from "./activity/activity.module";
 import { ClassModule } from "./classs/class.module";
 import { NoteModule } from "./note/note.module";
-import { StudentSpecialTokenModule } from './student-special-token/student-special-token.module';
-import { ResultModule } from './result/result.module';
-import { NotificationModule } from './notification/notification.module';
+import { StudentSpecialTokenModule } from "./student-special-token/student-special-token.module";
+import { ResultModule } from "./result/result.module";
+import { NotificationModule } from "./notification/notification.module";
+import { SocketGatewayModule } from "./socket-gateway/socket-gateway.module";
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { NotificationModule } from './notification/notification.module';
     StudentSpecialTokenModule,
     ResultModule,
     NotificationModule,
+    SocketGatewayModule,
   ],
   controllers: [AppController],
   providers: [AppService],

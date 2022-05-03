@@ -12,6 +12,7 @@ import { NotificationDto } from "src/notification/notification.model";
 import { NotificationService } from "src/notification/notification.service";
 import { CountingExam, ResultDto } from "src/result/result.model";
 import { ResultService } from "src/result/result.service";
+import { SocketGateway } from "src/socket-gateway/socket.gateway";
 import { Student } from "src/student/student.model";
 import { StudentService } from "src/student/student.service";
 import { Token } from "src/user/user.model";
@@ -29,6 +30,7 @@ export class StudentSpecialTokenService {
     @Inject(forwardRef(() => ResultService)) private readonly resultService: ResultService,
     @Inject(forwardRef(() => ActivityService)) private readonly activityService: ActivityService,
     @Inject(forwardRef(() => NotificationService)) private readonly notificationService: NotificationService,
+    @Inject(forwardRef(() => SocketGateway)) private readonly socketGateway: SocketGateway,
   ) {}
 
   async create(studentSpecialTokenDto: StudentSpecialTokenDto, user): Promise<StudentSpecialToken> {
@@ -165,7 +167,9 @@ export class StudentSpecialTokenService {
     try {
       await this.remove(token._id + "", token.user + "");
       await this.activityService.create(activityDto, token.user + "");
-      await this.notificationService.create(notificationDto);
+      let notification = await this.notificationService.create(notificationDto);
+      this.socketGateway.emitNotificationReceived(token.user + "", { notification });
+
       return await this.resultService.create(result);
     } catch (e) {}
   }

@@ -5,6 +5,7 @@ import { ClassModule } from "src/classs/class.module";
 import { ExamModule } from "src/exam/exam.module";
 import { NotificationModule } from "src/notification/notification.module";
 import { ResultModule } from "src/result/result.module";
+import { SocketGatewayModule } from "src/socket-gateway/socket-gateway.module";
 import { StudentModule } from "src/student/student.module";
 import { UserModule } from "src/user/user.module";
 import { StudentSpecialTokenController } from "./student-special-token.controller";
@@ -21,6 +22,7 @@ import { StudentSpecialTokenService } from "./student-special-token.service";
     forwardRef(() => ResultModule),
     forwardRef(() => ActivityModule),
     forwardRef(() => NotificationModule),
+    forwardRef(() => SocketGatewayModule),
   ],
   controllers: [StudentSpecialTokenController],
   providers: [StudentSpecialTokenService],
